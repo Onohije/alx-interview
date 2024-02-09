@@ -1,47 +1,61 @@
 #!/usr/bin/python3
-"""Solves the N queens puzzle challenge"""
+"""N Queens placement on NxN chessboard"""
+
+
 import sys
 
-if len(sys.argv) != 2:
-    print("Usage: nqueens N")
-    sys.exit(1)
 
-try:
-    N = int(sys.argv[1])
-    if N < 4:
+def generate_solutions(row, column):
+    solution = [[]]
+    for queen in range(row):
+        solution = place_queen(queen, column, solution)
+    return solution
+
+
+def place_queen(queen, column, prev_solution):
+    safe_position = []
+    for array in prev_solution:
+        for x in range(column):
+            if is_safe(queen, x, array):
+                safe_position.append(array + [x])
+    return safe_position
+
+
+def is_safe(q, x, array):
+    if x in array:
+        return (False)
+    else:
+        return all(abs(array[column] - x) != q - column
+                   for column in range(q))
+
+
+def init():
+    if len(sys.argv) != 2:
+        print("Usage: nqueens N")
+        sys.exit(1)
+    if sys.argv[1].isdigit():
+        n = int(sys.argv[1])
+    else:
+        print("N must be a number")
+        sys.exit(1)
+    if n < 4:
         print("N must be at least 4")
         sys.exit(1)
-except ValueError:
-    print("N must be a number")
-    sys.exit(1)
+    return (n)
 
 
-def resolve_matrix_for(queen, matrix, positions):
-    """
-    Resolves/removes reachable range of queen from the matrix then
-    recursively resolves for subsequent possible queen positions
-    for the next row.
-    """
-    positions.append(queen)
+def n_queens():
 
-    for cell in matrix[:]:
-        if any([cell == queen, cell[0] == queen[0], cell[1] == queen[1],
-                cell[0] - cell[1] == queen[0] - queen[1],
-                cell[0] + cell[1] == queen[0] + queen[1]]):
-            matrix.pop(matrix.index(cell))
-
-    # if end of the recursion
-    if len(matrix) == 0:
-        if len(positions) == N:
-            print(positions)
-        return
-
-    # else recursively check for possible queen positions
-    for possible_queen_pos in [cell for cell in matrix
-                               if cell[0] == matrix[0][0]]:
-        resolve_matrix_for(possible_queen_pos, matrix[:], positions[:])
+    n = init()
+    # generate all solutions
+    solutions = generate_solutions(n, n)
+    # print solutions
+    for array in solutions:
+        clean = []
+        for q, x in enumerate(array):
+            clean.append([q, x])
+        print(clean)
 
 
-for i in range(N):
-    resolve_matrix_for([0, i], [[x, y] for x in range(N)
-                       for y in range(N)], [])
+if __name__ == '__main__':
+    n_queens()
